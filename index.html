@@ -3,33 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Story Deck</title>
+<meta property="og:title" content="SETTLD — The Agent Opportunity">
+<meta property="og:description" content="Bridge crypto wealth to VIP casino experiences. Become an agent.">
+<title>SETTLD — The Agent Opportunity</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html, body {
-    width: 100%; height: 100vh;
-    overflow: hidden;
+    width: 100%; height: 100vh; overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-    background: #000; color: #fff;
-    -webkit-font-smoothing: antialiased;
-    touch-action: none;
+    background: #000; color: #f0f0f0;
+    -webkit-font-smoothing: antialiased; touch-action: none;
   }
-
-  /* ── Slide canvas ── */
-  #canvas {
-    width: 100%; height: 100vh;
-    position: relative; overflow: hidden;
-  }
-
+  #canvas { width: 100%; height: 100vh; position: relative; overflow: hidden; }
   .slide {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
     padding: 60px 28px 80px;
     transition: opacity 0.35s ease, transform 0.35s ease;
-    will-change: transform, opacity;
-    overflow-y: auto;
+    will-change: transform, opacity; overflow-y: auto;
   }
   .slide.exit-left   { transform: translateX(-100%); opacity: 0; }
   .slide.exit-right  { transform: translateX(100%);  opacity: 0; }
@@ -41,702 +33,290 @@
   .slide.enter-down  { transform: translateY(100%);   opacity: 0; }
   .slide.active      { transform: translate(0,0); opacity: 1; }
 
-  /* ── Themes ── */
-  .theme-dark   { background: linear-gradient(135deg, #0a0a0a, #1a1a2e); }
-  .theme-blue   { background: linear-gradient(135deg, #0f3460, #16213e); }
-  .theme-red    { background: linear-gradient(135deg, #1a1a2e, #e94560); }
-  .theme-green  { background: linear-gradient(135deg, #0a3d2e, #0f6e4e); }
-  .theme-purple { background: linear-gradient(135deg, #2d1b69, #6b3fa0); }
-  .theme-orange { background: linear-gradient(135deg, #1a1a2e, #e67e22); }
-  .theme-teal   { background: linear-gradient(135deg, #0a2a3e, #1abc9c); }
-  .theme-gold   { background: linear-gradient(135deg, #1a1a0e, #f39c12); }
-  .theme-navy   { background: linear-gradient(135deg, #0d1b2a, #1b2838); }
-  .theme-rose   { background: linear-gradient(135deg, #2e1a2e, #c0392b); }
+  .theme-black  { background: linear-gradient(160deg, #0a0a0f 0%, #111118 100%); }
+  .theme-gold   { background: linear-gradient(160deg, #0a0a0f 0%, #1a1505 50%, #2a1f08 100%); }
+  .theme-deep   { background: linear-gradient(160deg, #0a0a0f 0%, #0d1520 100%); }
+  .theme-accent { background: linear-gradient(160deg, #0a0a0f 0%, #1a0a12 50%, #2a0e1a 100%); }
+  .theme-green  { background: linear-gradient(160deg, #0a0a0f 0%, #0a1a10 100%); }
+  .theme-warm   { background: linear-gradient(160deg, #0f0a08 0%, #1a1008 100%); }
 
-  /* ── Typography ── */
-  h1 { font-size: clamp(26px, 6.5vw, 52px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; text-align: center; margin-bottom: 16px; max-width: 680px; }
-  h2 { font-size: clamp(20px, 4.5vw, 36px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; text-align: center; margin-bottom: 12px; max-width: 620px; }
-  p, .body { font-size: clamp(14px, 3.5vw, 19px); line-height: 1.65; text-align: center; max-width: 580px; opacity: 0.9; }
-  .emoji-big { font-size: clamp(48px, 12vw, 88px); margin-bottom: 20px; }
-  .label { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.45; margin-bottom: 12px; }
-  .stat { font-size: clamp(40px, 10vw, 76px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin: 8px 0; }
-  .stat-label { font-size: clamp(13px, 2.8vw, 17px); opacity: 0.55; margin-top: 4px; }
-  .highlight { color: #e94560; font-weight: 700; }
-  .highlight-green { color: #2ecc71; font-weight: 700; }
-  .quote { font-style: italic; font-size: clamp(16px, 3.8vw, 24px); line-height: 1.5; max-width: 520px; border-left: 3px solid rgba(255,255,255,0.3); padding-left: 20px; text-align: left; }
-  table { border-collapse: collapse; font-size: clamp(11px, 2.5vw, 15px); width: 90%; max-width: 480px; margin: 14px 0; }
-  th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.12); }
-  th { font-weight: 700; opacity: 0.6; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.08em; }
-  .vs-row { display: flex; align-items: center; gap: 18px; font-size: clamp(13px, 2.8vw, 18px); }
-  .vs-row .vs { font-size: clamp(22px, 5vw, 40px); font-weight: 900; opacity: 0.25; }
-  .team { text-align: center; min-width: 110px; }
-  .team .name { font-weight: 800; font-size: clamp(16px, 3.5vw, 24px); margin-bottom: 6px; }
-  .team .players { font-size: clamp(12px, 2.4vw, 15px); opacity: 0.7; line-height: 1.9; }
+  h1 { font-size: clamp(26px, 6.5vw, 50px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; text-align: center; margin-bottom: 16px; max-width: 680px; }
+  h2 { font-size: clamp(20px, 4.5vw, 34px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-align: center; margin-bottom: 12px; max-width: 620px; }
+  p, .body { font-size: clamp(14px, 3.5vw, 18px); line-height: 1.65; text-align: center; max-width: 560px; opacity: 0.85; }
+  .emoji-big { font-size: clamp(44px, 11vw, 80px); margin-bottom: 20px; }
+  .label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.35; margin-bottom: 14px; }
+  .stat { font-size: clamp(40px, 10vw, 72px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin: 8px 0; color: #d4af37; }
+  .stat-label { font-size: clamp(13px, 2.8vw, 16px); opacity: 0.5; margin-top: 6px; }
+  .accent { color: #d4af37; font-weight: 700; }
+  .accent-red { color: #e94560; font-weight: 700; }
+  .accent-green { color: #2ecc71; font-weight: 700; }
+  .quote { font-style: italic; font-size: clamp(16px, 3.8vw, 23px); line-height: 1.5; max-width: 500px; border-left: 2px solid rgba(212,175,55,0.4); padding-left: 20px; text-align: left; }
+  table { border-collapse: collapse; font-size: clamp(11px, 2.5vw, 14px); width: 90%; max-width: 460px; margin: 14px 0; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  th { font-weight: 700; opacity: 0.5; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; margin: 3px; }
+  .pill-gold { background: rgba(212,175,55,0.15); color: #d4af37; border: 1px solid rgba(212,175,55,0.25); }
+  .pill-white { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.1); }
+  .flow-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 10px 0; }
+  .flow-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; text-align: center; min-width: 80px; }
+  .flow-arrow { opacity: 0.3; font-size: 18px; }
+  .list-item { text-align: left; max-width: 480px; margin: 6px 0; font-size: clamp(13px, 3vw, 17px); line-height: 1.6; opacity: 0.85; }
 
-  /* ═══ TOP BAR ═══ */
-  #topbar {
-    position: fixed; top: 0; left: 0; right: 0;
-    height: 48px;
-    display: flex; align-items: center;
-    padding: 0 16px;
-    z-index: 200;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
-  }
-
-  /* Breadcrumb */
-  #breadcrumb {
-    font-size: 13px; font-weight: 600;
-    opacity: 0.7; display: flex; align-items: center; gap: 4px;
-    flex: 1;
-  }
-  #breadcrumb .crumb {
-    opacity: 0.4; cursor: pointer; transition: opacity 0.2s;
-  }
+  /* Nav */
+  #topbar { position: fixed; top: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; padding: 0 16px; z-index: 200; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
+  #breadcrumb { font-size: 12px; font-weight: 600; opacity: 0.6; display: flex; align-items: center; gap: 4px; flex: 1; }
+  #breadcrumb .crumb { opacity: 0.4; cursor: pointer; transition: opacity 0.2s; }
   #breadcrumb .crumb:hover { opacity: 0.8; }
-  #breadcrumb .crumb.current { opacity: 1; color: #e94560; }
-  #breadcrumb .sep { opacity: 0.2; margin: 0 2px; font-size: 10px; }
-
-  /* Sibling counter */
-  #counter {
-    font-size: 12px; font-weight: 700;
-    opacity: 0.5; letter-spacing: 0.05em;
-    margin-left: auto;
-  }
-
-  /* Map toggle */
-  #map-toggle {
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; cursor: pointer; opacity: 0.5;
-    transition: opacity 0.2s; margin-left: 12px;
-    border-radius: 6px;
-  }
-  #map-toggle:hover { opacity: 0.9; background: rgba(255,255,255,0.1); }
-
-  /* ═══ SIBLING PROGRESS BAR ═══ */
-  #progress-bar {
-    position: fixed; top: 48px; left: 0; right: 0;
-    height: 3px; z-index: 200;
-    display: flex; gap: 3px; padding: 0 16px;
-  }
-  #progress-bar .seg {
-    flex: 1; height: 3px; border-radius: 2px;
-    background: rgba(255,255,255,0.12);
-    transition: background 0.3s;
-    position: relative;
-  }
-  #progress-bar .seg.visited { background: rgba(255,255,255,0.3); }
-  #progress-bar .seg.active { background: rgba(255,255,255,0.9); }
-  #progress-bar .seg.has-children::after {
-    content: '';
-    position: absolute; bottom: -4px;
-    left: 50%; transform: translateX(-50%);
-    width: 4px; height: 4px; border-radius: 50%;
-    background: rgba(255,255,255,0.3);
-  }
-  #progress-bar .seg.active.has-children::after {
-    background: #e94560;
-  }
-
-  /* ═══ DIVE INDICATOR (bottom) ═══ */
-  #dive-indicator {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    display: flex; flex-direction: column; align-items: center;
-    padding-bottom: 16px;
-    z-index: 200;
-    opacity: 0; transition: opacity 0.3s;
-    pointer-events: none;
-    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%);
-    padding-top: 30px;
-  }
+  #breadcrumb .crumb.current { opacity: 1; color: #d4af37; }
+  #breadcrumb .sep { opacity: 0.15; margin: 0 2px; font-size: 10px; }
+  #counter { font-size: 11px; font-weight: 700; opacity: 0.4; letter-spacing: 0.05em; margin-left: auto; }
+  #map-toggle { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; margin-left: 12px; border-radius: 6px; }
+  #map-toggle:hover { opacity: 0.9; background: rgba(255,255,255,0.06); }
+  #progress-bar { position: fixed; top: 48px; left: 0; right: 0; height: 2px; z-index: 200; display: flex; gap: 2px; padding: 0 16px; }
+  #progress-bar .seg { flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.08); transition: background 0.3s; }
+  #progress-bar .seg.visited { background: rgba(212,175,55,0.3); }
+  #progress-bar .seg.active { background: rgba(212,175,55,0.9); }
+  #progress-bar .seg.has-children::after { content: ''; position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); width: 3px; height: 3px; border-radius: 50%; background: rgba(212,175,55,0.3); }
+  #dive-indicator { position: fixed; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; padding-bottom: 16px; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,0.4), transparent); padding-top: 30px; }
   #dive-indicator.visible { opacity: 1; }
-  #dive-indicator .arrow {
-    font-size: 20px; opacity: 0.6;
-    animation: bounce-down 1.5s ease-in-out infinite;
-  }
-  #dive-indicator .dive-label {
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    opacity: 0.4; margin-top: 4px;
-  }
-  #dive-indicator .child-count {
-    font-size: 10px; opacity: 0.3; margin-top: 2px;
-  }
-
-  @keyframes bounce-down {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(6px); }
-  }
-
-  /* ═══ BACK UP INDICATOR (top, when deep) ═══ */
-  #back-indicator {
-    position: fixed; top: 52px; left: 50%;
-    transform: translateX(-50%);
-    display: flex; align-items: center; gap: 6px;
-    z-index: 200;
-    opacity: 0; transition: opacity 0.3s;
-    pointer-events: none;
-  }
+  #dive-indicator .arrow { font-size: 18px; opacity: 0.5; animation: bd 1.5s ease-in-out infinite; }
+  #dive-indicator .dive-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.3; margin-top: 4px; }
+  @keyframes bd { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+  #back-indicator { position: fixed; top: 54px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   #back-indicator.visible { opacity: 1; pointer-events: auto; cursor: pointer; }
-  #back-indicator .arrow {
-    font-size: 14px; opacity: 0.5;
-    animation: bounce-up 1.5s ease-in-out infinite;
-  }
-  #back-indicator .back-label {
-    font-size: 10px; font-weight: 600;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    opacity: 0.35;
-  }
+  #back-indicator .arrow { font-size: 13px; opacity: 0.4; }
+  #back-indicator .back-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.3; }
+  #depth-rings { position: fixed; left: 12px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 200; }
+  .depth-ring { width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15); transition: all 0.3s; }
+  .depth-ring.active { border-color: #d4af37; background: #d4af37; box-shadow: 0 0 6px rgba(212,175,55,0.4); }
+  .depth-ring.ancestor { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .edge-arrow { position: fixed; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0; z-index: 150; transition: opacity 0.2s; pointer-events: none; }
+  .edge-arrow.left { left: 24px; }
+  .edge-arrow.right { right: 24px; }
+  .edge-arrow.visible { opacity: 0.12; }
 
-  @keyframes bounce-up {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-  }
-
-  /* ═══ DEPTH RINGS (left side) ═══ */
-  #depth-rings {
-    position: fixed; left: 12px; top: 50%;
-    transform: translateY(-50%);
-    display: flex; flex-direction: column;
-    align-items: center; gap: 6px;
-    z-index: 200;
-    transition: opacity 0.3s;
-  }
-  .depth-ring {
-    width: 8px; height: 8px; border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.2);
-    transition: all 0.3s;
-  }
-  .depth-ring.active {
-    border-color: #e94560;
-    background: #e94560;
-    box-shadow: 0 0 8px rgba(233,69,96,0.4);
-  }
-  .depth-ring.ancestor {
-    border-color: rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.15);
-  }
-
-  /* ═══ MINI-MAP OVERLAY ═══ */
-  #minimap {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.92);
-    z-index: 300;
-    display: none; flex-direction: column;
-    padding: 60px 24px 24px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    backdrop-filter: blur(20px);
-  }
+  #minimap { position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 300; display: none; flex-direction: column; padding: 60px 24px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(20px); }
   #minimap.open { display: flex; }
-  #minimap-close {
-    position: fixed; top: 16px; right: 16px;
-    font-size: 24px; cursor: pointer; opacity: 0.6;
-    z-index: 310; transition: opacity 0.2s;
-  }
-  #minimap-close:hover { opacity: 1; }
-  #minimap-title {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.16em; text-transform: uppercase;
-    opacity: 0.35; margin-bottom: 20px;
-  }
-  .map-node {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 8px 0; cursor: pointer;
-    transition: opacity 0.2s;
-    opacity: 0.5;
-  }
-  .map-node:hover { opacity: 0.9; }
+  #minimap-close { position: fixed; top: 16px; right: 16px; font-size: 22px; cursor: pointer; opacity: 0.5; z-index: 310; }
+  #minimap-title { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.3; margin-bottom: 20px; }
+  .map-node { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; cursor: pointer; opacity: 0.45; transition: opacity 0.2s; }
+  .map-node:hover { opacity: 0.85; }
   .map-node.current { opacity: 1; }
-  .map-node .map-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.3);
-    margin-top: 5px; flex-shrink: 0;
-    transition: all 0.3s;
-  }
-  .map-node.current .map-dot {
-    border-color: #e94560; background: #e94560;
-    box-shadow: 0 0 6px rgba(233,69,96,0.5);
-  }
-  .map-node .map-label {
-    font-size: 14px; font-weight: 600; line-height: 1.3;
-  }
-  .map-node .map-id {
-    font-size: 10px; opacity: 0.3; margin-top: 2px;
-    font-weight: 600; letter-spacing: 0.05em;
-  }
-  .map-children {
-    padding-left: 20px;
-    border-left: 1px solid rgba(255,255,255,0.06);
-    margin-left: 3px;
-  }
-
-  /* ═══ LEFT/RIGHT EDGE ARROWS ═══ */
-  .edge-arrow {
-    position: fixed; top: 50%; transform: translateY(-50%);
-    font-size: 22px; opacity: 0; z-index: 150;
-    transition: opacity 0.2s; pointer-events: none;
-  }
-  .edge-arrow.left { left: 28px; }
-  .edge-arrow.right { right: 28px; }
-  .edge-arrow.visible { opacity: 0.15; }
+  .map-node .map-dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.25); margin-top: 5px; flex-shrink: 0; transition: all 0.3s; }
+  .map-node.current .map-dot { border-color: #d4af37; background: #d4af37; box-shadow: 0 0 5px rgba(212,175,55,0.4); }
+  .map-node .map-label { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .map-node .map-id { font-size: 9px; opacity: 0.25; margin-top: 2px; font-weight: 600; }
+  .map-children { padding-left: 18px; border-left: 1px solid rgba(255,255,255,0.04); margin-left: 3px; }
 </style>
 </head>
 <body>
-
 <div id="topbar">
   <div id="breadcrumb"></div>
   <div id="counter"></div>
   <div id="map-toggle" onclick="toggleMap()">☰</div>
 </div>
-
 <div id="progress-bar"></div>
 <div id="back-indicator"><span class="arrow">↑</span><span class="back-label">back</span></div>
-<div id="dive-indicator">
-  <span class="arrow">↓</span>
-  <span class="dive-label">explore</span>
-  <span class="child-count"></span>
-</div>
+<div id="dive-indicator"><span class="arrow">↓</span><span class="dive-label">explore</span></div>
 <div id="depth-rings"></div>
 <div class="edge-arrow left">‹</div>
 <div class="edge-arrow right">›</div>
-
 <div id="minimap">
   <div id="minimap-close" onclick="toggleMap()">✕</div>
   <div id="minimap-title">Map</div>
   <div id="minimap-tree"></div>
 </div>
-
 <div id="canvas"></div>
 
 <script>
-// ═══════════════════════════════════════════
-// STORY DECK v2.1 — Enhanced Navigation
-// ═══════════════════════════════════════════
-
-const TREE = {
-  id: "root",
-  children: [
-    {
-      id: "1", title: "Compute Sufficiency", theme: "blue",
-      content: `<div class="label">Thesis #1</div>
-        <h1>The Compute Sufficiency Problem</h1>
-        <p>Does being #1 in compute guarantee being #1 in AI?</p>`,
-      children: [
-        {
-          id: "1.1", title: "Anthropic vs Google", theme: "blue",
-          content: `<div class="emoji-big">🧠</div>
-            <h2>Anthropic vs Google</h2>
-            <p>Claude Opus 4.6 — <span class="highlight">#2 best AI model globally</span><br><br>
-            Google has 10x the compute, vertically integrated TPUs, and the richest data corpus in history.<br><br>
-            <strong>Yet Claude beats Gemini.</strong></p>`,
-          children: [
-            {
-              id: "1.1.1", title: "Why Claude Wins", theme: "navy",
-              content: `<div class="label">Deep Dive</div>
-                <h2>Why Claude Wins</h2>
-                <p>Anthropic's edge isn't compute — it's <span class="highlight">architectural innovation</span> + RLHF technique.<br><br>
-                Claude Opus 4.6: Elo 1496 on LMSYS Arena — <strong>highest ever recorded</strong>.<br><br>
-                "Agent Teams" architecture: one prompt orchestrates multiple specialized sub-agents.</p>`
-            },
-            {
-              id: "1.1.2", title: "Google's Struggle", theme: "navy",
-              content: `<div class="label">Deep Dive</div>
-                <h2>Google's Struggle</h2>
-                <p>$175-185B capex in 2026<br>10x Anthropic's compute<br>Vertically integrated TPUs<br><br>
-                <strong>Still can't hold #1 on benchmarks.</strong><br><br>
-                Polymarket: Google at 21% for best model.<br>
-                The market says data + compute ≠ dominance.</p>`
-            }
-          ]
-        },
-        {
-          id: "1.2", title: "DeepSeek Precedent", theme: "blue",
-          content: `<div class="label">Evidence</div>
-            <h2>The DeepSeek Precedent</h2>
-            <div class="stat">$600B</div>
-            <div class="stat-label">wiped off NVDA in one day</div>
-            <p style="margin-top:16px">DeepSeek-R1 matched OpenAI's o1 using <strong>significantly less compute</strong> on older H800 chips.</p>`
-        },
-        {
-          id: "1.3", title: "The Core Insight", theme: "blue",
-          content: `<div class="quote">"Compute is oxygen, not steroids. You need it to survive, but breathing more doesn't make you faster."</div>
-            <br><p style="opacity:0.5">— Consensus hallway conversation</p>`
-        },
-        {
-          id: "1.4", title: "Capex Numbers", theme: "blue",
-          content: `<h2>Hyperscaler Capex 2026</h2>
-            <table>
-              <tr><th>Company</th><th>Capex</th></tr>
-              <tr><td>Google</td><td class="highlight">$175-185B</td></tr>
-              <tr><td>Amazon</td><td>$200B</td></tr>
-              <tr><td>Microsoft</td><td>~$100B</td></tr>
-              <tr><td>Meta</td><td>>$100B</td></tr>
-              <tr><td><strong>Total</strong></td><td class="highlight"><strong>~$700B</strong></td></tr>
-            </table>
-            <p style="opacity:0.6;margin-top:10px">But is the <em>rate</em> of growth decelerating?</p>`
-        }
-      ]
-    },
-    {
-      id: "2", title: "The Trade: GOOGL→AMZN", theme: "red",
-      content: `<div class="label">Thesis #2</div>
-        <h1>Sell GOOGL<br>Buy AMZN</h1>
-        <p>The Anthropic proxy trade</p>`,
-      children: [
-        {
-          id: "2.1", title: "Polymarket Odds", theme: "red",
-          content: `<h2>Polymarket Odds</h2>
-            <p class="label">Best AI Model — Feb 2026</p>
-            <table>
-              <tr><td>🟢 Anthropic</td><td class="highlight" style="font-size:1.3em"><strong>68%</strong></td></tr>
-              <tr><td>🟡 Google</td><td>21%</td></tr>
-              <tr><td>🔴 OpenAI</td><td>6%</td></tr>
-            </table>
-            <p style="margin-top:10px">$3.6M+ volume on Polymarket</p>`,
-          children: [
-            {
-              id: "2.1.1", title: "Longer-Term Markets", theme: "rose",
-              content: `<div class="label">Market Detail</div>
-                <h2>Longer-Term Odds</h2>
-                <table>
-                  <tr><th>Market</th><th>Leader</th><th>Odds</th></tr>
-                  <tr><td>Best model Mar '26</td><td>Anthropic</td><td>~55%</td></tr>
-                  <tr><td>Best model Jun '26</td><td>Google</td><td>54%</td></tr>
-                  <tr><td>Anthropic IPO <2027</td><td>Yes</td><td>55%</td></tr>
-                  <tr><td>OpenAI IPO <2027</td><td>Yes</td><td>41%</td></tr>
-                </table>`
-            }
-          ]
-        },
-        {
-          id: "2.2", title: "Why Amazon", theme: "red",
-          content: `<h2>Why Amazon?</h2>
-            <p>
-              <span class="highlight-green">✓</span> ~30%+ stake in Anthropic ($10B+)<br><br>
-              <span class="highlight-green">✓</span> Every Claude API call runs on AWS<br><br>
-              <span class="highlight-green">✓</span> Anthropic projected $18B rev in 2026<br><br>
-              <span class="highlight-green">✓</span> Closest liquid proxy to Anthropic
-            </p>`
-        },
-        {
-          id: "2.3", title: "The Insight", theme: "red",
-          content: `<div class="quote">"You can't buy Anthropic. You can't buy OpenAI. You can only buy Google... or Amazon."</div>
-            <br><p style="opacity:0.5">Polymarket at 68%. Stock market hasn't caught up.</p>`
-        }
-      ]
-    },
-    {
-      id: "3", title: "Apple: Body No Brain", theme: "purple",
-      content: `<div class="label">Thesis #3</div>
-        <h1>Apple: All Body,<br>No Brain</h1>
-        <p>The on-device AI revolution</p>`,
-      children: [
-        {
-          id: "3.1", title: "Intelligent Phone", theme: "purple",
-          content: `<div class="emoji-big">📱</div>
-            <h2>Smartphone → Intelligent Phone</h2>
-            <p>The next iPhone won't be a smartphone.<br><br>
-            It will be an <span class="highlight">agent that does stuff for you</span>, powered by a local LLM on Apple Silicon.</p>`
-        },
-        {
-          id: "3.2", title: "Why It Matters", theme: "purple",
-          content: `<h2>Why It Changes Everything</h2>
-            <p>🔒 <strong>Privacy:</strong> No data sent to cloud<br><br>
-              ⚡ <strong>Always on:</strong> No internet needed<br><br>
-              💰 <strong>No inference cost:</strong> Runs locally<br><br>
-              🔗 <strong>Lock-in:</strong> Best AI only on latest iPhone</p>`
-        },
-        {
-          id: "3.3", title: "Distribution Wins", theme: "purple",
-          content: `<div class="quote">"Apple doesn't need to build the brain. They just need the body. And the brain will be built into the body."</div>
-            <br><p style="opacity:0.5">Distribution wins. Brains are commoditized.</p>`
-        }
-      ]
-    },
-    {
-      id: "4", title: "Perpetual Opinion Markets", theme: "teal",
-      content: `<div class="label">Product Idea</div>
-        <h1>Perpetual Opinion Markets</h1>
-        <p>Turn public sentiment into a tradeable asset</p>`,
-      children: [
-        {
-          id: "4.1", title: "The Concept", theme: "teal",
-          content: `<h2>The Concept</h2>
-            <p>5 AI models score public figures daily (0-100).<br><br>
-            Average = the "real" sentiment score.<br><br>
-            Trade long/short with <span class="highlight">perpetual funding rates</span>.</p>`
-        },
-        {
-          id: "4.2", title: "Why It Works", theme: "teal",
-          content: `<h2>Why It Works</h2>
-            <p>📈 <strong>Continuous:</strong> Not binary like Polymarket<br><br>
-              🤖 <strong>AI oracle:</strong> Multi-model consensus<br><br>
-              🔄 <strong>Perp structure:</strong> No end date<br><br>
-              🐦 <strong>Twitter native:</strong> Every tweet is a catalyst</p>`
-        }
-      ]
-    },
-    {
-      id: "5", title: "All-Time 5v5 Draft", theme: "orange",
-      content: `<div class="label">After Hours</div>
-        <div class="emoji-big">🏀</div>
-        <h1>All-Time 5v5</h1>
-        <p>Pak vs Terrence — Fantasy Draft</p>`,
-      children: [
-        {
-          id: "5.1", title: "The Teams", theme: "orange",
-          content: `<div class="vs-row">
-              <div class="team"><div class="name">PAK</div>
-                <div class="players">👑 LeBron<br>🎯 Curry<br>🐍 KD<br>🪝 Kareem<br>⚡ SGA</div></div>
-              <div class="vs">VS</div>
-              <div class="team"><div class="name">TERRENCE</div>
-                <div class="players">🐐 Jordan<br>👽 Wemby<br>🦌 Giannis<br>🪄 Luka<br>🃏 Jokić</div></div>
-            </div>`
-        },
-        {
-          id: "5.2", title: "Result", theme: "orange",
-          content: `<div class="stat">4-3</div>
-            <div class="stat-label">PAK WINS IN 7 🏆</div>
-            <br><p><strong>Series MVP: LeBron James</strong><br>31.4 / 10.4 / 11.1</p>
-            <br><p style="opacity:0.6">Jordan averaged 34.9 and still lost.<br>System > Superstar. 👑</p>`
-        }
-      ]
-    }
-  ]
-};
-
-// ── ENGINE ──
-const canvas = document.getElementById('canvas');
-const breadcrumbEl = document.getElementById('breadcrumb');
-const counterEl = document.getElementById('counter');
-const progressEl = document.getElementById('progress-bar');
-const diveEl = document.getElementById('dive-indicator');
-const backEl = document.getElementById('back-indicator');
-const depthEl = document.getElementById('depth-rings');
-const leftArrow = document.querySelector('.edge-arrow.left');
-const rightArrow = document.querySelector('.edge-arrow.right');
-
-let path = [0];
-let currentSlideEl = null;
-
-function getNode(p) {
-  let n = TREE;
-  for (const i of p) { if (!n.children || !n.children[i]) return null; n = n.children[i]; }
-  return n;
-}
-function getSiblings(p) {
-  if (p.length === 0) return TREE.children || [];
-  const pp = p.slice(0, -1);
-  const par = p.length === 1 ? TREE : getNode(pp);
-  return par ? (par.children || []) : [];
-}
-function currentNode() { return getNode(path); }
-function currentIndex() { return path[path.length - 1]; }
-function currentSiblings() { return getSiblings(path); }
-
-function renderSlide(node, direction) {
-  if (!node) return;
-  const slide = document.createElement('div');
-  slide.className = `slide ${node.theme ? 'theme-' + node.theme : 'theme-dark'}`;
-  slide.innerHTML = node.content;
-  if (direction) slide.classList.add('enter-' + direction);
-  else slide.classList.add('active');
-  canvas.appendChild(slide);
-
-  if (currentSlideEl) {
-    const old = currentSlideEl;
-    const exitDir = direction === 'left' ? 'right' : direction === 'right' ? 'left' : direction === 'up' ? 'down' : direction === 'down' ? 'up' : 'left';
-    old.classList.remove('active');
-    old.classList.add('exit-' + exitDir);
-    setTimeout(() => old.remove(), 400);
-  }
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      slide.classList.remove('enter-left', 'enter-right', 'enter-up', 'enter-down');
-      slide.classList.add('active');
-    });
-  });
-  currentSlideEl = slide;
-  updateUI();
-}
-
-function updateUI() {
-  const node = currentNode();
-  const siblings = currentSiblings();
-  const idx = currentIndex();
-  const hasChildren = node && node.children && node.children.length > 0;
-  const isDeep = path.length > 1;
-
-  // Breadcrumb
-  let crumbs = '';
-  for (let d = 0; d < path.length; d++) {
-    const p = path.slice(0, d + 1);
-    const n = getNode(p);
-    if (d > 0) crumbs += '<span class="sep">›</span>';
-    const cls = d === path.length - 1 ? 'crumb current' : 'crumb';
-    crumbs += `<span class="${cls}" data-path="${p.join(',')}">${n ? (n.title || n.id) : ''}</span>`;
-  }
-  breadcrumbEl.innerHTML = crumbs;
-
-  // Click breadcrumbs to navigate
-  breadcrumbEl.querySelectorAll('.crumb').forEach(el => {
-    el.addEventListener('click', () => {
-      const targetPath = el.dataset.path.split(',').map(Number);
-      if (targetPath.join(',') !== path.join(',')) {
-        path = targetPath;
-        renderSlide(currentNode(), 'down');
+const TREE = { id:"root", children:[
+  {
+    id:"1", title:"The Opportunity", theme:"black",
+    content:`<div class="label">SETTLD</div>
+      <h1>The Agent<br>Opportunity</h1>
+      <p>Bridge crypto wealth to VIP casino experiences.<br>Run it as a business.</p>`,
+    children:[
+      {
+        id:"1.1", title:"The $200B Gap", theme:"gold",
+        content:`<div class="stat">$200B+</div>
+          <div class="stat-label">Macau + Asia gaming revenue at 90-95% recovery</div>
+          <br><p>The legacy VIP system collapsed. COVID + regulation killed the old junket model.<br><br>
+          <span class="accent">New blood needed.</span> That's you.</p>`
+      },
+      {
+        id:"1.2", title:"Old vs New", theme:"black",
+        content:`<h2>What Broke</h2>
+          <table>
+            <tr><th>Old Model</th><th>SETTLD Model</th></tr>
+            <tr><td>Credit-based (trust required)</td><td class="accent">Debit/crypto-backed (trustless)</td></tr>
+            <tr><td>OTC partners (risky, 4% fees)</td><td class="accent">Stablecoin pools (on-chain, transparent)</td></tr>
+            <tr><td>HK regulations limit pool sizes</td><td class="accent">Smart contract pools, no limits</td></tr>
+            <tr><td>Must trust your junket operator</td><td class="accent">Funds visible on-chain</td></tr>
+            <tr><td>Restricted to legacy networks</td><td class="accent">Open to crypto-native agents</td></tr>
+          </table>`
+      },
+      {
+        id:"1.3", title:"Why Now", theme:"deep",
+        content:`<h2>Why Now?</h2>
+          <p>
+            <span class="accent">1.</span> Legacy Macau operators relocated overseas post-crackdown<br><br>
+            <span class="accent">2.</span> Crypto wealth is at all-time highs with nowhere to spend<br><br>
+            <span class="accent">3.</span> New casino markets opening (UAE 2027, Korea, SE Asia)<br><br>
+            <span class="accent">4.</span> Web3 people haven't experienced VIP casino lifestyle<br><br>
+            <span class="accent">5.</span> 95% of legacy business flows through agents — that model still works
+          </p>`
       }
-    });
-  });
-
-  // Counter
-  counterEl.textContent = `${idx + 1} / ${siblings.length}`;
-
-  // Progress bar
-  progressEl.innerHTML = '';
-  siblings.forEach((sib, i) => {
-    const seg = document.createElement('div');
-    seg.className = 'seg';
-    if (i < idx) seg.classList.add('visited');
-    if (i === idx) seg.classList.add('active');
-    if (sib.children && sib.children.length > 0) seg.classList.add('has-children');
-    seg.addEventListener('click', () => {
-      if (i !== idx) { path[path.length - 1] = i; renderSlide(currentNode(), i > idx ? 'left' : 'right'); }
-    });
-    progressEl.appendChild(seg);
-  });
-
-  // Dive indicator
-  if (hasChildren) {
-    diveEl.classList.add('visible');
-    diveEl.querySelector('.child-count').textContent = `${node.children.length} items`;
-  } else {
-    diveEl.classList.remove('visible');
-  }
-
-  // Back indicator
-  if (isDeep) backEl.classList.add('visible');
-  else backEl.classList.remove('visible');
-
-  // Depth rings
-  depthEl.innerHTML = '';
-  if (path.length > 1) {
-    for (let d = 0; d < path.length; d++) {
-      const ring = document.createElement('div');
-      ring.className = 'depth-ring';
-      if (d === path.length - 1) ring.classList.add('active');
-      else ring.classList.add('ancestor');
-      depthEl.appendChild(ring);
-    }
-  }
-
-  // Edge arrows
-  leftArrow.classList.toggle('visible', idx > 0);
-  rightArrow.classList.toggle('visible', idx < siblings.length - 1);
-}
-
-// ── MINI-MAP ──
-const minimap = document.getElementById('minimap');
-const minimapTree = document.getElementById('minimap-tree');
-
-function toggleMap() {
-  minimap.classList.toggle('open');
-  if (minimap.classList.contains('open')) renderMap();
-}
-
-function renderMap() {
-  minimapTree.innerHTML = '';
-  function renderNode(node, parentEl, nodePath) {
-    const el = document.createElement('div');
-    el.className = 'map-node';
-    if (nodePath.join(',') === path.join(',')) el.classList.add('current');
-    el.innerHTML = `<div class="map-dot"></div><div><div class="map-label">${node.title || node.id}</div><div class="map-id">§${node.id}</div></div>`;
-    el.addEventListener('click', () => {
-      path = [...nodePath];
-      renderSlide(currentNode(), null);
-      toggleMap();
-    });
-    parentEl.appendChild(el);
-    if (node.children && node.children.length > 0) {
-      const childContainer = document.createElement('div');
-      childContainer.className = 'map-children';
-      node.children.forEach((child, i) => renderNode(child, childContainer, [...nodePath, i]));
-      parentEl.appendChild(childContainer);
-    }
-  }
-  TREE.children.forEach((child, i) => renderNode(child, minimapTree, [i]));
-}
-
-// Click back indicator
-backEl.addEventListener('click', () => navigate('up'));
-
-// ── NAVIGATION ──
-let isAnimating = false;
-function navigate(action) {
-  if (isAnimating) return;
-  isAnimating = true;
-  setTimeout(() => isAnimating = false, 380);
-  const node = currentNode();
-  const siblings = currentSiblings();
-  const idx = currentIndex();
-  switch (action) {
-    case 'right':
-      if (idx < siblings.length - 1) { path[path.length - 1]++; renderSlide(currentNode(), 'left'); }
-      else if (path.length > 1) {
-        path.pop();
-        const pIdx = path[path.length - 1];
-        const pSib = currentSiblings();
-        if (pIdx < pSib.length - 1) { path[path.length - 1]++; renderSlide(currentNode(), 'left'); }
-        else renderSlide(currentNode(), 'up');
+    ]
+  },
+  {
+    id:"2", title:"How It Works", theme:"deep",
+    content:`<div class="emoji-big">⚙️</div>
+      <h1>How It Works</h1>
+      <p>Three steps. Trustless. Transparent.</p>`,
+    children:[
+      {
+        id:"2.1", title:"The Flow", theme:"deep",
+        content:`<h2>The Settlement Flow</h2>
+          <div class="flow-row">
+            <div class="flow-box"><div style="font-size:24px">💰</div><div style="font-size:11px;opacity:0.6;margin-top:4px">Client deposits<br>stablecoin</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><div style="font-size:24px">🔗</div><div style="font-size:11px;opacity:0.6;margin-top:4px">Visible in<br>liquidity pool</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><div style="font-size:24px">🎰</div><div style="font-size:11px;opacity:0.6;margin-top:4px">Casino issues<br>chips</div></div>
+          </div>
+          <br><p style="opacity:0.6">Crypto-to-crypto. No OTC. No trust required.<br>The smart contract is the escrow.</p>`
+      },
+      {
+        id:"2.2", title:"Your Role as Agent", theme:"deep",
+        content:`<h2>Your Role as Agent</h2>
+          <p>
+            <span class="accent">→</span> Bring clients to the platform<br><br>
+            <span class="accent">→</span> Clients deposit into pool<br><br>
+            <span class="accent">→</span> They play at VIP tables<br><br>
+            <span class="accent">→</span> House edge generates GGR<br><br>
+            <span class="accent">→</span> You earn a % of GGR from your clients<br><br>
+            <span class="accent-red">You win when the house wins.</span><br>
+            <span style="opacity:0.5">And the house always wins.</span>
+          </p>`
+      },
+      {
+        id:"2.3", title:"The Yield", theme:"gold",
+        content:`<h2>Where Yield Comes From</h2>
+          <table>
+            <tr><td>Source</td><td class="accent">Gross Gaming Revenue (GGR)</td></tr>
+            <tr><td>Baccarat house edge</td><td>~1.5% per hand</td></tr>
+            <tr><td>Your share</td><td class="accent">% of pool × casino performance</td></tr>
+            <tr><td>Theoretical range</td><td>100-200% APY</td></tr>
+          </table>
+          <br><p style="opacity:0.5">Real yield from real casino operations.<br>Not ponzi tokenomics. Not DeFi vaporware.</p>`
       }
-      break;
-    case 'left':
-      if (idx > 0) { path[path.length - 1]--; renderSlide(currentNode(), 'right'); }
-      break;
-    case 'down':
-      if (node && node.children && node.children.length > 0) { path.push(0); renderSlide(currentNode(), 'up'); }
-      break;
-    case 'up':
-      if (path.length > 1) { path.pop(); renderSlide(currentNode(), 'down'); }
-      break;
+    ]
+  },
+  {
+    id:"3", title:"Who You Are", theme:"warm",
+    content:`<div class="emoji-big">🎯</div>
+      <h1>Who This Is For</h1>
+      <p>Three types of agents we're looking for</p>`,
+    children:[
+      {
+        id:"3.1", title:"Crypto-Native Operators", theme:"warm",
+        content:`<h2>Profile 1:<br>Crypto-Native Operators</h2>
+          <p>You have a network of crypto-wealthy friends.<br>They want experiences, not another DeFi protocol.<br><br>
+          <span class="accent">You bring them to VIP tables.</span><br>
+          <span class="accent">They play. You earn.</span><br><br>
+          <span class="pill pill-gold">Web3</span>
+          <span class="pill pill-gold">High Net Worth Network</span>
+          <span class="pill pill-gold">Experience-Driven</span></p>`
+      },
+      {
+        id:"3.2", title:"Legacy Casino Operators", theme:"warm",
+        content:`<h2>Profile 2:<br>Legacy Operators</h2>
+          <p>Former junket agents or VIP room operators.<br>You left Macau but still have the network.<br><br>
+          <span class="accent">Same business. New rails.</span><br>
+          Crypto replaces the OTC. Smart contracts replace trust.<br><br>
+          <span class="pill pill-white">Former Junket</span>
+          <span class="pill pill-white">Macau Network</span>
+          <span class="pill pill-white">Relocated</span></p>`
+      },
+      {
+        id:"3.3", title:"Crossover Players", theme:"warm",
+        content:`<h2>Profile 3:<br>Crossover Players</h2>
+          <p>You go to BOTH crypto conferences AND casino conferences.<br><br>
+          You understand the overlap that nobody else sees.<br><br>
+          <span class="accent">You are rare. And you are exactly who we need.</span><br><br>
+          <span class="pill pill-gold">Consensus</span>
+          <span class="pill pill-gold">Token2049</span>
+          <span class="pill pill-white">ICE Barcelona</span>
+          <span class="pill pill-white">ACE</span></p>`
+      }
+    ]
+  },
+  {
+    id:"4", title:"The Vision", theme:"gold",
+    content:`<div class="label">Long-term</div>
+      <h1>Beyond the Table</h1>
+      <p>This isn't just casino settlement.<br>It's a membership. A community. A lifestyle.</p>`,
+    children:[
+      {
+        id:"4.1", title:"Mobility Membership", theme:"gold",
+        content:`<h2>The Mobility Membership</h2>
+          <p>Think <span class="accent">Soho House</span> for crypto-casino mobility.<br><br>
+          Not about the clubhouse (not yet).<br>
+          About the <strong>routes</strong>:<br><br>
+          🌏 SE Asia route<br>
+          🏜️ UAE-Saudi route<br>
+          🎰 Korea-Japan route<br><br>
+          <span style="opacity:0.5">One carry-on suitcase. Different country every few days.<br>
+          You can bring people → you earn.</span></p>`
+      },
+      {
+        id:"4.2", title:"Roadmap", theme:"gold",
+        content:`<h2>The Path</h2>
+          <p>
+            <span class="accent">Phase 1:</span> Contracts with 6 casino locations<br>Use their event spaces and VIP rooms<br><br>
+            <span class="accent">Phase 2:</span> Own clubhouses, gym, social spaces<br>Soho House-style, crypto-native<br><br>
+            <span class="accent">Phase 3:</span> UAE opening 2027<br>Ras Al Khaimah — set the regulatory standard<br>for the next wave of gaming
+          </p>`
+      },
+      {
+        id:"4.3", title:"The Brand", theme:"black",
+        content:`<div class="quote">"It's not about the tech. It's not even about the liquidity. It's about ACCESS. It's about IDENTITY. It's about COMMUNITY."</div>
+          <br><p style="opacity:0.4">If you know, you know.</p>`
+      }
+    ]
+  },
+  {
+    id:"5", title:"Next Steps", theme:"accent",
+    content:`<div class="emoji-big">🤝</div>
+      <h1>Become an Agent</h1>
+      <p>The table is set. The chips are ready.<br><span class="accent">Are you in?</span></p>
+      <br><p style="opacity:0.4">pak@settld.org</p>`,
+    children:[]
   }
-}
+]};
 
-// ── INPUT ──
-let tx = 0, ty = 0, tt = 0;
-document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now(); }, { passive: true });
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - tx;
-  const dy = e.changedTouches[0].clientY - ty;
-  const dt = Date.now() - tt;
-  if (dt > 600 || (Math.abs(dx) < 25 && Math.abs(dy) < 25)) return;
-  if (Math.abs(dx) > Math.abs(dy)) navigate(dx < -25 ? 'right' : 'left');
-  else navigate(dy < -25 ? 'down' : 'up');
-}, { passive: true });
-
-document.addEventListener('keydown', e => {
-  if (minimap.classList.contains('open')) { if (e.key === 'Escape') toggleMap(); return; }
-  switch (e.key) {
-    case 'ArrowRight': case 'l': navigate('right'); break;
-    case 'ArrowLeft': case 'h': navigate('left'); break;
-    case 'ArrowDown': case 'j': case ' ': navigate('down'); e.preventDefault(); break;
-    case 'ArrowUp': case 'k': navigate('up'); e.preventDefault(); break;
-    case 'Escape': if (path.length > 1) navigate('up'); break;
-    case 'm': toggleMap(); break;
-  }
-});
-
-let wLock = false;
-document.addEventListener('wheel', e => {
-  e.preventDefault();
-  if (wLock) return; wLock = true; setTimeout(() => wLock = false, 400);
-  if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) navigate(e.deltaX > 0 ? 'right' : 'left');
-  else if (Math.abs(e.deltaY) > 10) navigate(e.deltaY > 0 ? 'down' : 'up');
-}, { passive: false });
-
-// ── INIT ──
-renderSlide(currentNode(), null);
+// ── ENGINE (same as v2) ──
+const canvas=document.getElementById('canvas'),breadcrumbEl=document.getElementById('breadcrumb'),counterEl=document.getElementById('counter'),progressEl=document.getElementById('progress-bar'),diveEl=document.getElementById('dive-indicator'),backEl=document.getElementById('back-indicator'),depthEl=document.getElementById('depth-rings'),leftArrow=document.querySelector('.edge-arrow.left'),rightArrow=document.querySelector('.edge-arrow.right');
+let path=[0],currentSlideEl=null;
+function getNode(p){let n=TREE;for(const i of p){if(!n.children||!n.children[i])return null;n=n.children[i]}return n}
+function getSiblings(p){if(!p.length)return TREE.children||[];const pp=p.slice(0,-1),par=p.length===1?TREE:getNode(pp);return par?(par.children||[]):[]}
+function currentNode(){return getNode(path)}
+function currentIndex(){return path[path.length-1]}
+function currentSiblings(){return getSiblings(path)}
+function renderSlide(node,dir){if(!node)return;const s=document.createElement('div');s.className=`slide ${node.theme?'theme-'+node.theme:'theme-black'}`;s.innerHTML=node.content;if(dir)s.classList.add('enter-'+dir);else s.classList.add('active');canvas.appendChild(s);if(currentSlideEl){const old=currentSlideEl;const ed=dir==='left'?'right':dir==='right'?'left':dir==='up'?'down':dir==='down'?'up':'left';old.classList.remove('active');old.classList.add('exit-'+ed);setTimeout(()=>old.remove(),400)}requestAnimationFrame(()=>{requestAnimationFrame(()=>{s.classList.remove('enter-left','enter-right','enter-up','enter-down');s.classList.add('active')})});currentSlideEl=s;updateUI()}
+function updateUI(){const node=currentNode(),siblings=currentSiblings(),idx=currentIndex(),hasChildren=node&&node.children&&node.children.length>0,isDeep=path.length>1;let crumbs='';for(let d=0;d<path.length;d++){const p=path.slice(0,d+1),n=getNode(p);if(d>0)crumbs+='<span class="sep">›</span>';crumbs+=`<span class="crumb ${d===path.length-1?'current':''}" data-path="${p.join(',')}">${n?(n.title||n.id):''}</span>`}breadcrumbEl.innerHTML=crumbs;breadcrumbEl.querySelectorAll('.crumb').forEach(el=>{el.addEventListener('click',()=>{const tp=el.dataset.path.split(',').map(Number);if(tp.join(',')!==path.join(',')){path=tp;renderSlide(currentNode(),'down')}})});counterEl.textContent=`${idx+1} / ${siblings.length}`;progressEl.innerHTML='';siblings.forEach((sib,i)=>{const seg=document.createElement('div');seg.className='seg';if(i<idx)seg.classList.add('visited');if(i===idx)seg.classList.add('active');if(sib.children&&sib.children.length>0)seg.classList.add('has-children');seg.addEventListener('click',()=>{if(i!==idx){path[path.length-1]=i;renderSlide(currentNode(),i>idx?'left':'right')}});progressEl.appendChild(seg)});if(hasChildren){diveEl.classList.add('visible')}else{diveEl.classList.remove('visible')}if(isDeep)backEl.classList.add('visible');else backEl.classList.remove('visible');depthEl.innerHTML='';if(path.length>1){for(let d=0;d<path.length;d++){const r=document.createElement('div');r.className='depth-ring';if(d===path.length-1)r.classList.add('active');else r.classList.add('ancestor');depthEl.appendChild(r)}}leftArrow.classList.toggle('visible',idx>0);rightArrow.classList.toggle('visible',idx<siblings.length-1)}
+const minimap=document.getElementById('minimap'),minimapTree=document.getElementById('minimap-tree');
+function toggleMap(){minimap.classList.toggle('open');if(minimap.classList.contains('open'))renderMap()}
+function renderMap(){minimapTree.innerHTML='';function rn(node,par,np){const el=document.createElement('div');el.className='map-node';if(np.join(',')===path.join(','))el.classList.add('current');el.innerHTML=`<div class="map-dot"></div><div><div class="map-label">${node.title||node.id}</div><div class="map-id">§${node.id}</div></div>`;el.addEventListener('click',()=>{path=[...np];renderSlide(currentNode(),null);toggleMap()});par.appendChild(el);if(node.children&&node.children.length>0){const cc=document.createElement('div');cc.className='map-children';node.children.forEach((c,i)=>rn(c,cc,[...np,i]));par.appendChild(cc)}}TREE.children.forEach((c,i)=>rn(c,minimapTree,[i]))}
+backEl.addEventListener('click',()=>navigate('up'));
+let isAnimating=false;
+function navigate(a){if(isAnimating)return;isAnimating=true;setTimeout(()=>isAnimating=false,380);const node=currentNode(),siblings=currentSiblings(),idx=currentIndex();switch(a){case'right':if(idx<siblings.length-1){path[path.length-1]++;renderSlide(currentNode(),'left')}else if(path.length>1){path.pop();const pi=path[path.length-1],ps=currentSiblings();if(pi<ps.length-1){path[path.length-1]++;renderSlide(currentNode(),'left')}else renderSlide(currentNode(),'up')}break;case'left':if(idx>0){path[path.length-1]--;renderSlide(currentNode(),'right')}break;case'down':if(node&&node.children&&node.children.length>0){path.push(0);renderSlide(currentNode(),'up')}break;case'up':if(path.length>1){path.pop();renderSlide(currentNode(),'down')}break}}
+let tx=0,ty=0,tt=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tt=Date.now()},{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty,dt=Date.now()-tt;if(dt>600||(Math.abs(dx)<25&&Math.abs(dy)<25))return;if(Math.abs(dx)>Math.abs(dy))navigate(dx<-25?'right':'left');else navigate(dy<-25?'down':'up')},{passive:true});
+document.addEventListener('keydown',e=>{if(minimap.classList.contains('open')){if(e.key==='Escape')toggleMap();return}switch(e.key){case'ArrowRight':case'l':navigate('right');break;case'ArrowLeft':case'h':navigate('left');break;case'ArrowDown':case'j':case' ':navigate('down');e.preventDefault();break;case'ArrowUp':case'k':navigate('up');e.preventDefault();break;case'Escape':if(path.length>1)navigate('up');break;case'm':toggleMap();break}});
+let wL=false;document.addEventListener('wheel',e=>{e.preventDefault();if(wL)return;wL=true;setTimeout(()=>wL=false,400);if(Math.abs(e.deltaX)>Math.abs(e.deltaY)&&Math.abs(e.deltaX)>10)navigate(e.deltaX>0?'right':'left');else if(Math.abs(e.deltaY)>10)navigate(e.deltaY>0?'down':'up')},{passive:false});
+renderSlide(currentNode(),null);
 </script>
 </body>
 </html>
